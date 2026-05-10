@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+
+*.pyc
+.env
+venv/
+checkpoints/
+runs/
+wandb/
+*.pt
+*.pth
+data/
