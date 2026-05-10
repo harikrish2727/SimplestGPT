@@ -5,11 +5,6 @@ build/
 dist/
 wheels/
 *.egg-info
-
-# Virtual environments
-.venv
-
-
 *.pyc
 .env
 venv/
@@ -19,3 +14,9 @@ wandb/
 *.pt
 *.pth
 data/
+
+# Virtual environments
+.venv
+
+
+
