@@ -50,6 +50,11 @@ def main(read_data_func,data_set,stream_data_func):
 
 
 if __name__ == "__main__":
+  from pathlib import Path
+
+  Path("/app/output").mkdir(parents=True, exist_ok=True)
+
+  save_path = "/app/output/shakespeare_gpt.pt"
   
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   
@@ -67,5 +72,5 @@ if __name__ == "__main__":
   torch.save({"model_state": gpt.state_dict(),
             "model_config": {"vocabulary":65,"emb_dim":256,"seq_length":256,"head_count":8,"n_blocks":8},
             "char2i":char2i,
-            "i2char":i2char},"shakespere_gpt.pt"
+            "i2char":i2char}, save_path
            )
