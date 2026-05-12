@@ -35,8 +35,8 @@ def main(url,read_data_func,data_set,stream_data_func):
     train_data = data_set(train_ids,64)
     val_data = data_set(val_ids,64)
     
-    train_loader = DataLoader(dataset=train_data,batch_size=128,shuffle=True)
-    val_loader = DataLoader(dataset=val_data,batch_size=128,shuffle=False)
+    train_loader = DataLoader(dataset=train_data,batch_size=64,shuffle=True)
+    val_loader = DataLoader(dataset=val_data,batch_size=64,shuffle=False)
 
     return train_loader, val_loader, char2i, i2char
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
   
   train_loader, val_loader, char2i, i2char = main(url, read_data, ShakespereDataset, stream_data)
 
-  gpt = SimplestGPT(V=65,C=64,T=64,head_count=4,n_blocks=4)
+  gpt = SimplestGPT(vocabulary=65, emb_dim=256, seq_length=256, head_count=8, n_blocks=8)
 
   optim = torch.optim.AdamW(gpt.parameters(),lr=3e-4,betas=[0.9,0.95],eps=1e-8,weight_decay=0.1)
   scheduler = get_cosine_schedule_with_warmup(optim,num_warmup_steps=1000,num_training_steps=10000)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
   training(gpt,num_epochs=10,train_loader=train_loader,val_loader=val_loader,optimizer=optim,lr_scheduler=scheduler,device=device)
 
   torch.save({"model_state": gpt.state_dict(),
-            "model_config": {"vocabulary":65,"emb_dim":64,"seq_length":64,"head_count":4,"n_blocks":4},
+            "model_config": {"vocabulary":65,"emb_dim":256,"seq_length":256,"head_count":8,"n_blocks":8},
             "char2i":char2i,
             "i2char":i2char},"shakespere_gpt.pt"
            )

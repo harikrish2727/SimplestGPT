@@ -24,7 +24,7 @@ def training(model, num_epochs, train_loader, val_loader, optimizer, lr_schedule
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
-            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+            grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             lr_scheduler.step()
             epoch_loss.append(loss.item())
@@ -33,7 +33,5 @@ def training(model, num_epochs, train_loader, val_loader, optimizer, lr_schedule
             if step % eval_every == 0:
                 val_loss = evaluate(model, val_loader, device)
                 avg_train = sum(epoch_loss[-eval_every:]) / eval_every
-                # ↓ if train_loss also stuck, model isn't learning
-                # ↓ if train_loss drops but val stays, evaluate() has a bug
                 print(f"step {step} | train_loss: {avg_train:.4f} | val_loss: {val_loss:.4f} | grad_norm: {grad_norm:.4f} | lr: {optimizer.param_groups[0]['lr']:.6f}")
                 model.train()

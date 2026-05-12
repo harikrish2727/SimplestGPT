@@ -5,14 +5,14 @@ import torch.nn.functional as F
 from block import TransformerBlock
 
 class SimplestGPT(nn.Module):
-  def __init__(self,V,C,T,head_count,n_blocks):
+  def __init__(self,vocabulary,emb_dim,seq_length,head_count,n_blocks):
     super().__init__()
-    self.blocks = nn.Sequential(*[TransformerBlock(head_count,T,C) for _ in range(n_blocks)])
-    self.embedding = nn.Embedding(V,C)
-    self.pos_emb = nn.Embedding(T,C)
-    self.lm_head = nn.Linear(C,V,bias=False)
-    self.layernorm = nn.LayerNorm(C)
-    self.T = T
+    self.blocks = nn.Sequential(*[TransformerBlock(head_count,seq_length,emb_dim) for _ in range(n_blocks)])
+    self.embedding = nn.Embedding(vocabulary,emb_dim)
+    self.pos_emb = nn.Embedding(seq_length,emb_dim)
+    self.lm_head = nn.Linear(emb_dim,vocabulary,bias=False)
+    self.layernorm = nn.LayerNorm(emb_dim)
+    self.T = seq_length
     self.lm_head.weight = self.embedding.weight
 
 
