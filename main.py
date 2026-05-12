@@ -60,7 +60,9 @@ if __name__ == "__main__":
   optim = torch.optim.AdamW(gpt.parameters(),lr=3e-4,betas=[0.9,0.95],eps=1e-8,weight_decay=0.1)
   scheduler = get_cosine_schedule_with_warmup(optim,num_warmup_steps=1000,num_training_steps=10000)
 
-  training(gpt,num_epochs=10,train_loader=train_loader,val_loader=val_loader,optimizer=optim,lr_scheduler=scheduler,device=device)
+  training(gpt,num_epochs=2,train_loader=train_loader,val_loader=val_loader,optimizer=optim,lr_scheduler=scheduler,device=device)
+
+  gpt.load_state_dict(torch.load("best_model.pt"))
 
   torch.save({"model_state": gpt.state_dict(),
             "model_config": {"vocabulary":65,"emb_dim":256,"seq_length":256,"head_count":8,"n_blocks":8},
