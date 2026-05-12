@@ -1,50 +1,24 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage 1: Builder
-# ─────────────────────────────────────────────────────────────────────────────
-FROM python:3.12-slim AS builder
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    UV_LINK_MODE=copy
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    git \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN pip install --no-cache-dir uv
-
-# Copy dependency metadata first
-COPY pyproject.toml uv.lock* ./
-
-# Install all deps EXCEPT torch
-# torch already comes from CUDA runtime stage
-RUN uv sync --frozen --no-dev --no-install-package torch
-
-# Copy project
-COPY . .
+RUN pip install --no-cache-dir \
+    transformers \
+    requests \
+    python-dotenv
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Stage 2: CUDA Runtime
-# ─────────────────────────────────────────────────────────────────────────────
-FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-runtime
+COPY attention.py block.py data_preparation.py dataset.py \
+     eval.py feedforward.py gpt.py train.py main.py ./
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
+COPY input.txt ./
 
-WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Copy virtual environment
-COPY --from=builder /app/.venv /app/.venv
+VOLUME ["/app/output"]
 
-# Copy source code
-COPY --from=builder /app /app
-
-# Default command
+# Pass your .env at runtime:  docker run --gpus all --env-file .env ...
 CMD ["python", "main.py"]
