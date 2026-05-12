@@ -19,8 +19,8 @@ def stream_data(input_data):
     yield char
 
 
-def main(url,read_data_func,data_set,stream_data_func):
-    input_text = read_data_func(url)
+def main(read_data_func,data_set,stream_data_func):
+    input_text = read_data_func()
     chars = sorted(list(set(input_text)))
     char2i = {ch:i for i,ch in enumerate(chars)}
     i2char = {i:ch for i,ch in enumerate(chars)}
@@ -53,7 +53,7 @@ if __name__ == "__main__":
   
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   
-  train_loader, val_loader, char2i, i2char = main(url, read_data, ShakespereDataset, stream_data)
+  train_loader, val_loader, char2i, i2char = main(read_data, ShakespereDataset, stream_data)
 
   gpt = SimplestGPT(vocabulary=65, emb_dim=256, seq_length=256, head_count=8, n_blocks=8)
 

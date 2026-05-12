@@ -19,10 +19,11 @@ def get_data(url):
             f.write(data)
     return
 
-def read_data(url):
+def read_data():
     if not pathlib.Path("input.txt").exists():
         print("input.txt does not exist. Downloading...")
         try:
+            url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
             get_data(url)
         except FileNotFoundError:
             raise FileNotFoundError("input.txt does not exist.")
