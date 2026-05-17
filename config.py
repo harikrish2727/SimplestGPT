@@ -8,6 +8,7 @@ class LLMConfig():
   vocabulary:int = 65
   head_count:int = 8
   n_block:int = 8
+  lr=3e-4
 
   def __post_init__(self):
     assert self.d_model % self.n_heads ==0
