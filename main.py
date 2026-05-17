@@ -1,16 +1,17 @@
 import torch
+import os
 from gpt import SimplestGPT
 from transformers import get_cosine_schedule_with_warmup
 from dataset import ShakespereDataset
 from torch.utils.data import DataLoader
 from data_preparation import read_data
 from train import training
-from dotenv import load_dotenv
-import os
+# from dotenv import load_dotenv
+from config import llm_config
 
 load_dotenv()
 
-url = os.getenv("url")
+# url = os.getenv("url")
 
 
 
@@ -19,8 +20,8 @@ def stream_data(input_data):
     yield char
 
 
-def main(read_data_func,data_set,seq_len,batch_size):
-    input_text = read_data_func()
+def main(data_set,seq_len,batch_size):
+    input_text = read_data()
     chars = sorted(list(set(input_text)))
     char2i = {ch:i for i,ch in enumerate(chars)}
     i2char = {i:ch for i,ch in enumerate(chars)}
@@ -58,19 +59,19 @@ if __name__ == "__main__":
   
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
   
-  train_loader, val_loader, char2i, i2char = main(read_data, ShakespereDataset, seq_len=256,batch_size=64)
+  train_loader, val_loader, char2i, i2char = main(ShakespereDataset, seq_len=llm_config.seq_len,batch_size=llm_config.batch_size)
 
-  gpt = SimplestGPT(vocabulary=65, emb_dim=256, seq_length=256, head_count=8, n_blocks=8)
+  gpt = SimplestGPT(vocabulary=llm_config.vocabulary, emb_dim=llm_config.emb_dim, seq_length=llm_config.seq_len, head_count=llm_config.head_count, n_blocks=llm_config.n_blocks)
 
-  optim = torch.optim.AdamW(gpt.parameters(),lr=3e-4,betas=[0.9,0.95],eps=1e-8,weight_decay=0.1)
+  optim = torch.optim.AdamW(gpt.parameters(),lr=llm_config.lr,betas=[0.9,0.95],eps=1e-8,weight_decay=0.1)
   scheduler = get_cosine_schedule_with_warmup(optim,num_warmup_steps=1000,num_training_steps=10000)
 
-  training(gpt,num_epochs=2,train_loader=train_loader,val_loader=val_loader,optimizer=optim,lr_scheduler=scheduler,device=device)
+  training(gpt,num_epochs=llm_config.num_epochs,train_loader=train_loader,val_loader=val_loader,optimizer=optim,lr_scheduler=scheduler,device=device)
 
   gpt.load_state_dict(torch.load("best_model.pt"))
 
   torch.save({"model_state": gpt.state_dict(),
-            "model_config": {"vocabulary":65,"emb_dim":256,"seq_length":256,"head_count":8,"n_blocks":8},
+            "model_config": {"vocabulary"=llm_config.vocabulary, "emb_dim"=llm_config.emb_dim, "seq_length"=llm_config.seq_len, "head_count"=llm_config.head_count, "n_blocks"=llm_config.n_blocks},
             "char2i":char2i,
             "i2char":i2char}, save_path
            )
